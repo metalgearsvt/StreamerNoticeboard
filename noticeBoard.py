@@ -45,12 +45,11 @@ async def update_board():
             else:
                 noticeMessage = await channel.send(content="", embed=getEmbed())
             updateSetting(Constants.SETTING_MESSAGE, noticeMessage.id)
-        await asyncio.sleep(10)
+        await asyncio.sleep(30)
 
 @client.event
 async def on_ready():
     print('Logged in as: ' + client.user.name)
-    await client.change_presence(activity=discord.Game(name='I have no butt and I must shitte.'))
     client.loop.create_task(update_board())
 
 @client.event
