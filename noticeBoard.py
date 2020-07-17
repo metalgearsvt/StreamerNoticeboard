@@ -45,11 +45,12 @@ async def update_board():
             else:
                 noticeMessage = await channel.send(content="", embed=getEmbed())
             updateSetting(Constants.SETTING_MESSAGE, noticeMessage.id)
-        await asyncio.sleep(30)
+        await asyncio.sleep(10)
 
 @client.event
 async def on_ready():
     print('Logged in as: ' + client.user.name)
+    await client.change_presence(activity=discord.Game(name='I have no butt and I must shitte.'))
     client.loop.create_task(update_board())
 
 @client.event
@@ -115,8 +116,7 @@ def getOfflineEmbed(embedded, bossImage):
     if bossImage != "":
         embedded.set_thumbnail(url=bossImage)
 
-    # TODO: REMOVE
-    embedded.set_footer(text="Running on backup server!")    
+    embedded.set_footer(text=datetime.now().strftime("%m/%d/%y - %H:%M:%S"))    
     return embedded
 
 # Gets the content for the embed.
@@ -129,15 +129,16 @@ def getEmbed():
         embedded = getOfflineEmbed(embedded, "")
         return embedded
 
-    embedded = discord.Embed(title="Stream Noticeboard", description="", color=0x00FFFF)
-    if isUserLive(boss[Constants.DB_STREAM_BROADCASTID]):
+    embedded = discord.Embed(title="Stream Noticeboard", description="", color=0xFF0000)
+    liveBossInfo = getBossInfo()
+    if len(liveBossInfo) > 0:
         # The streamboss is live.
-        streamboss = getBossInfo()[0]
+        streamboss = liveBossInfo[0]
         embedded.add_field(name=Constants.RECORD_EMOJI + str(" " + streamboss['display'] + " is live!"), value="Join now: "+streamboss['url'], inline=False)
-        embedded.add_field(name=streamboss['title'], value=streamboss['game'], inline=False)
+        embedded.add_field(name=streamboss['title']+ "\u200B", value=streamboss['game'] + "\u200B", inline=False)
         embedded.set_image(url=streamboss['img'])
-        # TODO: REMOVE
-        embedded.set_footer(text="Running on backup server!")   
+
+        embedded.set_footer(text=datetime.now().strftime("%m/%d/%y - %H:%M:%S"))   
     else:
         # The streamboss is not live.
         embedded = getOfflineEmbed(embedded, getLogo(boss[Constants.DB_STREAM_BROADCASTID]))
