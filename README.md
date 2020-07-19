@@ -2,9 +2,9 @@
 
 Install discord.py with
 
-python3 -m pip install -U discord.py
+`python3 -m pip install -U discord.py`
 or Windows
-py -3 -m pip install -U discord.py
+`py -3 -m pip install -U discord.py`
 
 pip install requests
 
