@@ -23,29 +23,32 @@ conn.row_factory = dict_factory
 # Update 
 async def update_board():
     while True:
-        available = await isNoticeMessageAvailable()
-        embedMode = getSetting(Constants.SETTING_EMBED)
-        if available:
-            # If we have an existing message.
-            noticeMessage = await getNoticeMessage()
+        try:
+            available = await isNoticeMessageAvailable()
+            embedMode = getSetting(Constants.SETTING_EMBED)
+            if available:
+                # If we have an existing message.
+                noticeMessage = await getNoticeMessage()
 
-            # Check if the message's contents are different, and edit if so.
-            if embedMode == "0":
-                editedMessage = getNoticeboard()
-                if editedMessage != noticeMessage.content:
-                    await noticeMessage.edit(content=str(getNoticeboard()), embed=None)
+                # Check if the message's contents are different, and edit if so.
+                if embedMode == "0":
+                    editedMessage = getNoticeboard()
+                    if editedMessage != noticeMessage.content:
+                        await noticeMessage.edit(content=str(getNoticeboard()), embed=None)
+                else:
+                    embedded = getEmbed()
+                    await noticeMessage.edit(content="", embed=embedded)
             else:
-                embedded = getEmbed()
-                await noticeMessage.edit(content="", embed=embedded)
-        else:
-            # We should send a new one.
-            channel = client.get_channel(int(getSetting(Constants.SETTING_CHANNEL)))
-            if embedMode == "0":
-                noticeMessage = await channel.send(content=getNoticeboard(), embed=None)
-            else:
-                noticeMessage = await channel.send(content="", embed=getEmbed())
-            updateSetting(Constants.SETTING_MESSAGE, noticeMessage.id)
-        await asyncio.sleep(30)
+                # We should send a new one.
+                channel = client.get_channel(int(getSetting(Constants.SETTING_CHANNEL)))
+                if embedMode == "0":
+                    noticeMessage = await channel.send(content=getNoticeboard(), embed=None)
+                else:
+                    noticeMessage = await channel.send(content="", embed=getEmbed())
+                updateSetting(Constants.SETTING_MESSAGE, noticeMessage.id)
+        except:
+            traceback.print_exc()
+        await asyncio.sleep(10)
 
 @client.event
 async def on_ready():
@@ -372,7 +375,7 @@ def getStreamerList(type):
 
 # Returns true if the userId provided is live, false if not.
 def isUserLive(broadcastId):
-    headers = {'Accept': 'application/vnd.twitchtv.v5+json', 'Client-ID': 'nwoafaczjhgkhqntjv34utror7agjk'}
+    headers = {'Accept': 'application/vnd.twitchtv.v5+json', 'Client-ID': Config.CLIENT_ID}
     response = requests.get('https://api.twitch.tv/kraken/streams/' + broadcastId, headers=headers)
     responseJson = response.json()
     if responseJson['stream'] is None:
@@ -401,7 +404,7 @@ def getLiveList(ulist):
     for u in ulist:
         users += u[Constants.DB_STREAM_BROADCASTID] + ","
 
-    headers = {'Accept': 'application/vnd.twitchtv.v5+json', 'Client-ID': 'nwoafaczjhgkhqntjv34utror7agjk'}
+    headers = {'Accept': 'application/vnd.twitchtv.v5+json', 'Client-ID': Config.CLIENT_ID}
     response = requests.get('https://api.twitch.tv/kraken/streams/?limit=100&channel=' + users, headers=headers)
     responseJson = response.json()
     liveList = []
@@ -412,7 +415,7 @@ def getLiveList(ulist):
 
 # Get broadcast ID logo
 def getLogo(userid):
-    headers = {'Accept': 'application/vnd.twitchtv.v5+json', 'Client-ID': 'nwoafaczjhgkhqntjv34utror7agjk'}
+    headers = {'Accept': 'application/vnd.twitchtv.v5+json', 'Client-ID': Config.CLIENT_ID}
     response = requests.get('https://api.twitch.tv/kraken/users/' + userid, headers=headers)
     responseJson = response.json()
     return responseJson['logo']
